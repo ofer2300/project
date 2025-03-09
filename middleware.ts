@@ -1,18 +1,23 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+export async function middleware(request: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req: request, res })
+
+  // Refresh session if expired - required for Server Components
+  await supabase.auth.getSession()
 
   // Protect admin routes
-  if (pathname.startsWith('/admin')) {
-    const token = request.cookies.get('session')
-    if (!token) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
       return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
   }
 
-  return NextResponse.next()
+  return res
 }
 
 export const config = {
