@@ -1,24 +1,23 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  await supabase.auth.getSession()
-  return res
+  // Protect admin routes
+  if (pathname.startsWith('/admin')) {
+    const token = request.cookies.get('session')
+    if (!token) {
+      return NextResponse.redirect(new URL('/auth/signin', request.url))
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/admin/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 } 
