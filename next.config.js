@@ -1,12 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com'],
-    unoptimized: true,
+    domains: ['localhost', 'vercel.app', 'github.com'],
+    unoptimized: true
+  },
+  i18n: {
+    locales: ['en', 'he'],
+    defaultLocale: 'en',
+    localeDetection: false
+  },
+  eslint: {
+    ignoreDuringBuilds: true
   }
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
